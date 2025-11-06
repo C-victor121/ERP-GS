@@ -1,0 +1,45 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Importar componentes personalizados (usa @apply dentro de @layer components) */
+@import './components.css';
+
+/* Base de tema moderno Global Solar */
+@layer base {
+  :root {
+    --foreground-rgb: 17, 24, 39; /* text-gray-900 */
+    --background-rgb: 249, 250, 251; /* gray-50 */
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-gray-50 text-gray-900 antialiased;
+    color: rgb(var(--foreground-rgb));
+    background: rgb(var(--background-rgb));
+  }
+
+  h1 {@apply text-3xl font-bold text-gray-900;}
+  h2 {@apply text-2xl font-semibold text-gray-900;}
+  h3 {@apply text-xl font-semibold text-gray-800;}
+  h4 {@apply text-lg font-medium text-gray-800;}
+
+  a {@apply text-green-700 hover:text-green-800 underline-offset-2 hover:underline;}
+
+  /* Controles de formulario por defecto */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  select,
+  textarea {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500;
+  }
+
+  button {
+    @apply inline-flex items-center justify-center rounded-md font-medium transition-colors disabled:opacity-50;
+  }
+}

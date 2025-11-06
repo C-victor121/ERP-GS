@@ -1,0 +1,31 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Entornos
+.env
+.env.*
+client/.env.local
+server/.env
+
+# Next.js
+client/.next/
+client/out/
+
+# Builds/Dist
+server/dist/
+client/dist/
+
+# Cobertura
+coverage/
+client/coverage/
+server/coverage/
+
+# Subidas (archivos de runtime, no de código)
+server/uploads/
+
+# SO
+.DS_Store
+Thumbs.db

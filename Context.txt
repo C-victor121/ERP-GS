@@ -1,0 +1,47 @@
+// Global Solar – ERP-GS
+// Contexto & Reglas de Trabajo (no modificar sin aprobación de Víctor Camargo)
+// --------------------------------------------------
+// 1. Este archivo es el único punto de referencia para la IA y el equipo.
+// 2. Cualquier cambio aquí requiere PR y aprobación explícita.
+// 3. Mantener siempre la última versión actualizada en la rama main.
+// --------------------------------------------------
+
+PRODUCTO
+Nombre: Global Solar – ERP para operaciones y contabilidad.
+Stack: MERN (MongoDB, Express, React, Node).
+Moneda por defecto: COP (almacenar como enteros, mostrar con formato).
+Iteraciones: sprints ≤ 8 h, PRs < 500 líneas, tests incluidos.
+
+REGLAS DE ITERACIÓN
+- Plan → Aprobación Víctor → Diseño → Código → PR → QA → Merge.
+- Commits: feat(modulo): breve, fix(issue), chore(tarea).
+- Ramas: feature/<modulo>-<breve>, fix/<issue>, chore/<tarea>.
+- Nunca tocar producción sin snapshot/rollback documentado.
+
+MODELOS MONGO (borrador validado Sprint 0)
+users: _id, email, passwordHash, role(admin|contador|gerente|usuario), name, createdAt.
+products: _id, sku(GS-INV-YYYY-XXX), name, category, unit, costUnit(int COP), salePrice(int COP), stock, location, createdAt.
+invoices: _id, number, date, client{name,nit}, lines[{sku,description,qty,unitPrice,subtotal}], subTotal, iva(19%), total, status(Pagada|Pendiente), createdBy, createdAt.
+purchases: _id, supplier, date, lines[{sku,qty,costUnit}], total, documentRef.
+assets: _id, assetId(GS-ACT-YYYY-XXX), description, acquisitionDate, cost, lifeYears, depreciationMethod, accumulatedDepreciation, bookValue.
+payroll: _id, employeeId, period(YYYY-MM), salaryBase, transportAid, otherEarnings, employeeDeductions, employerContributions, netPay, status.
+accounting_entries: _id, date, description, lines[{accountCode,debit,credit}], createdBy.
+
+ENDPOINTS MÍNIMOS (Sprint 1)
+GET  /api/health
+POST /api/auth/login
+GET  /api/users (admin)
+POST /api/products
+GET  /api/products
+POST /api/invoices
+GET  /api/invoices
+POST /api/purchases
+
+SETUP LOCAL (copiar en README)
+git clone <repo>
+cd global-solar
+cp backend/.env.example backend/.env
+npm i
+npm run dev       # levanta backend en 5000
+npm run test      # Jest + supertest
+npm run lint      # ESLint + Prettier
