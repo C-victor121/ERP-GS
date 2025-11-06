@@ -148,8 +148,9 @@ export const deleteEmployee = async (req: Request, res: Response, next: NextFunc
       return next(new ApiError(403, 'No tiene acceso a este empleado'));
     }
     
-    // En lugar de eliminar, cambiar el estado a inactivo
+    // En lugar de eliminar, cambiar el estado a inactivo y registrar fecha de terminación
     employee.estado = 'inactivo';
+    employee.fechaTerminacion = new Date();
     await employee.save();
     
     return res.status(200).json({
@@ -164,17 +165,44 @@ export const deleteEmployee = async (req: Request, res: Response, next: NextFunc
 // Obtener empleados activos para nómina
 export const getActiveEmployees = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    let query: any = { estado: 'activo' };
+    const { periodo } = req.query as { periodo?: string };
+    let query: any = {};
     
     // Filtro por empresa del usuario
     const user = (req as any).user;
     if (user?.empresa) {
       query.empresa = user.empresa;
     }
-    
-    const employees = await Employee.find(query)
-      .select('codigo nombre apellido cargo departamento salarioBase fechaIngreso')
-      .sort({ nombre: 1 });
+
+    let employees;
+    if (periodo) {
+      // Formato esperado YYYY-MM
+      const [yearStr, monthStr] = periodo.split('-');
+      const year = parseInt(yearStr, 10);
+      const month = parseInt(monthStr, 10) - 1; // JS: 0-11
+      const periodStart = new Date(year, month, 1);
+      const periodEnd = new Date(year, month + 1, 0); // último día del mes
+
+      // Empleados cuyo vínculo laboral se solapa con el mes: ingreso <= fin y (sin terminación o terminación >= inicio)
+      employees = await Employee.find({
+        ...query,
+        fechaIngreso: { $lte: periodEnd },
+        $or: [
+          { fechaTerminacion: { $exists: false } },
+          { fechaTerminacion: { $gte: periodStart } },
+        ],
+      })
+        .select('codigo nombre apellido cargo departamento salarioBase fechaIngreso fechaTerminacion estado')
+        .sort({ nombre: 1 });
+    } else {
+      // Por defecto: activos actualmente
+      employees = await Employee.find({
+        ...query,
+        estado: 'activo',
+      })
+        .select('codigo nombre apellido cargo departamento salarioBase fechaIngreso fechaTerminacion estado')
+        .sort({ nombre: 1 });
+    }
     
     return res.status(200).json({
       success: true,

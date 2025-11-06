@@ -1,5 +1,78 @@
 import { Request, Response } from 'express';
 import User from '../models/user.model';
+// Crear un nuevo usuario
+export const createUser = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    const { nombre, apellido, email, password, rol, empresa } = req.body;
+
+    // Verificar si el email ya existe
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: 'El email ya está registrado',
+      });
+    }
+
+    // Crear nuevo usuario
+    const newUser = new User({
+      nombre,
+      apellido,
+      email,
+      password,
+      rol: rol || 'vendedor',
+      empresa,
+    });
+
+    await newUser.save();
+
+    // No devolver la contraseña
+    const userResponse = await User.findById(newUser._id).select('-password');
+
+    return res.status(201).json({
+      success: true,
+      message: 'Usuario creado exitosamente',
+      data: userResponse,
+    });
+  } catch (error: any) {
+    return res.status(500).json({
+      success: false,
+      message: 'Error al crear usuario',
+      error: error.message,
+    });
+  }
+};
+
+// Actualizar estado de usuario (activar/desactivar)
+export const updateUserStatus = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    const { activo } = req.body;
+    const userId = req.params.id;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'Usuario no encontrado',
+      });
+    }
+
+    user.activo = activo;
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: `Usuario ${activo ? 'activado' : 'desactivado'} exitosamente`,
+      data: user,
+    });
+  } catch (error: any) {
+    return res.status(500).json({
+      success: false,
+      message: 'Error al actualizar estado del usuario',
+      error: error.message,
+    });
+  }
+};
 
 // Obtener todos los usuarios
 export const getAllUsers = async (req: Request, res: Response): Promise<Response> => {

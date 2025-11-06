@@ -17,7 +17,9 @@ export interface IEmployee extends Document {
   cargo: string;
   departamento: string;
   salarioBase: number;
+  usaSalarioMinimo?: boolean;
   fechaIngreso: Date;
+  fechaTerminacion?: Date;
   estado: 'activo' | 'inactivo' | 'suspendido';
   eps: string;
   pension: string;
@@ -98,10 +100,18 @@ const EmployeeSchema: Schema = new Schema(
       required: [true, 'El salario base es obligatorio'],
       min: [0, 'El salario base no puede ser negativo'],
     },
+    usaSalarioMinimo: {
+      type: Boolean,
+      default: false,
+    },
     fechaIngreso: {
       type: Date,
       required: [true, 'La fecha de ingreso es obligatoria'],
       default: Date.now,
+    },
+    fechaTerminacion: {
+      type: Date,
+      required: false,
     },
     estado: {
       type: String,
